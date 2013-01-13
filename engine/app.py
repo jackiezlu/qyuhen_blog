@@ -13,7 +13,7 @@ class AppEngine(object):
     # 
     def _get_handlers(self):
         # 
-        # 获取 engine.web 和 action 中的所有 ActionHandler。
+        # 获取 engine.web 和 action 中的所有 RequestHandler。
         # 
         from inspect import isclass
         from tornado.web import RequestHandler
