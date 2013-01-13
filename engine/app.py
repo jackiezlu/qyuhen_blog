@@ -51,7 +51,7 @@ class AppEngine(object):
         # 当 DEBUG = True 时，修改的模块自动重载。
         # 
         from os import getpid
-        from tornado.httpserver import HTTPServer, HTTPRequest
+        from tornado.httpserver import HTTPServer
         from tornado.web import Application
         from tornado.ioloop import IOLoop
 
