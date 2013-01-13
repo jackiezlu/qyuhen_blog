@@ -1,6 +1,6 @@
 # coding=utf-8
 
-__all__ = ["app"]
+__all__ = []
 
 
 # 
@@ -45,10 +45,11 @@ def _set_signal():
     # 
     # 处理退出信号
     # 
+    from os import getpid
     from signal import signal, SIGINT, SIGTERM
 
     def handler(signum, frame):
-        print "bye..."
+        print "Process {0} exit!".format(getpid())
         exit(0)
 
     signal(SIGINT, handler)

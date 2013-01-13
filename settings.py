@@ -1,4 +1,4 @@
 # coding=utf-8
 
-DEBUG = False
+DEBUG = True
 TEST = "Hello, World!"
