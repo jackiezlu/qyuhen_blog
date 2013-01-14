@@ -14,6 +14,7 @@ def app_path(name):
     return normpath(join(root, name))
 
 
+
 def set_defaultencoding():
     # 
     # 设置默认编码
@@ -27,6 +28,7 @@ def set_defaultencoding():
     setdefaultencoding(getdefaultlocale()[1])
 
 
+
 def get_module_members(module, predicate):
     # 
     # 获取模块成员
@@ -35,6 +37,7 @@ def get_module_members(module, predicate):
 
     members = getmembers(module, predicate)
     return map(lambda m: m[1], members)
+
 
     
 def get_package_members(package, predicate):

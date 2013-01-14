@@ -8,7 +8,7 @@ class AppEngine(object):
     #
     # 基于 Tornado 封装
     # 
-    # 1. 自动搜索相关模块，查找处理方法，并封装成 Handler 类型。
+    # 1. 自动搜索相关模块，查找处理方法，并封装成 RequestHandler 类型。
     # 2. 依据配置决定是否启用多进程模式。
     # 
     def _get_handlers(self):
@@ -23,14 +23,18 @@ class AppEngine(object):
         handlers = []
 
         # 动态载入处理器。
-        predicate = lambda m: isclass(m) and issubclass(m, RequestHandler) and hasattr(m, "__url__")
+        predicate = lambda m: isclass(m) and issubclass(m, RequestHandler) and hasattr(m, "action")
         handlers.extend(get_module_members(web, predicate))
         handlers.extend(get_package_members(action, predicate))
 
-        # 显示载入信息。
-        for handler in handlers: print " + Load: {0}, {1}".format(handler.__name__, handler.__action__)
+        # 排序
+        handlers.sort(key = lambda h: h.action.order)
 
-        return [(h.__url__, h) for h in handlers]
+        # 显示载入信息。
+        for h in handlers: 
+            print " + Load: [{0:>3}] {1:5} {2}  {3}".format(h.action.order, h.action.method, h.action.name, h.action.url)
+
+        return map(lambda h: (h.action.url, h), handlers)
 
 
     def _get_settings(self):
