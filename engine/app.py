@@ -44,6 +44,11 @@ class AppEngine(object):
         return dict(
             debug = settings.DEBUG,
             gzip = settings.GZIP,
+            login_url = settings.LOGIN,
+            template_path = settings.TEMPLATE,
+            static_path = settings.STATIC,
+            cookie_secret = settings.SECRET,
+            xsrf_cookies = not settings.DEBUG,
         )
 
 
