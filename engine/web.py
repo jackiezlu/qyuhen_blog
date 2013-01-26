@@ -22,6 +22,7 @@ class BaseHandler(RequestHandler):
         # 处理登录、缓存。
         # 
         self._save_next_url()
+        self._set_nocache()
 
 
     def get_error_html(self, status_code, **kwargs):
@@ -47,6 +48,14 @@ class BaseHandler(RequestHandler):
         return self.get_secure_cookie(self.USER_TOKEN)
 
 
+    def _set_nocache(self):
+        # 
+        # 阻止浏览器缓存。
+        # 适用于访问 Ajax，避免无法刷新。
+        # 
+        if self.action.nocache: self.set_header("Cache-Control", "No-Cache")
+
+
     def _save_next_url(self):
         # 
         # 保存 login_url 页面的 next 参数，以便登录后跳回。
@@ -59,6 +68,9 @@ class BaseHandler(RequestHandler):
     def signin(self, name, expires_days = None, redirect = True):
         # 
         # 写入登录凭证信息。
+        # 
+        # 访问登录页面时，会将 next 参数值写入 cookie。
+        # 登录方法从 cookie 获取要跳转的页面。
         # 
         # 参数:
         #   name            用户标识
@@ -127,32 +139,5 @@ def action(url, method = "GET", enabled = True, order = 0, auth = False, nocache
         return type(name, (BaseHandler,), attrs)
 
     return gen_handler
-
-
-
-@action(r"/hello", auth = True, order = 10)
-def hello(handler):
-    # 
-    # 演示
-    # 
-    handler.write("Hello, World!\n")
-    handler.write(handler.current_user + "\n")
-
-
-@action(r"/login")
-def login(handler):
-    # 
-    # 显示登录页面
-    # 
-    handler.write('<a href="/signin">signin</a>\n'.format(next))
-
-
-@action(r"/signin")
-def signin(handler):    
-    # 
-    # 登录页面 submit，通常会传入 username, password 进行验证。
-    # 
-    handler.signin("yuhen", 1)
-
 
 

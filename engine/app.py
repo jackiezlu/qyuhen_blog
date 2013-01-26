@@ -3,6 +3,23 @@
 __all__ = ["start"]
 
 
+from tornado.web import Application as torandoApplication, RedirectHandler, ErrorHandler
+
+
+
+class Application(torandoApplication):
+    # 
+    # Tornado Application
+    # 
+    def __call__(self, request):
+        # 
+        # 在处理错误前，记录请求信息。
+        # 
+        handler = super(Application, self).__call__(request)
+        print " *  URI: {0:<15} {1}".format(type(handler).__name__, request.uri)
+        return handler
+
+
 
 class AppEngine(object):
     #
@@ -61,7 +78,6 @@ class AppEngine(object):
         # 
         from os import getpid
         from tornado.httpserver import HTTPServer
-        from tornado.web import Application
         from tornado.ioloop import IOLoop
 
         app = Application(self._get_handlers(), **self._get_settings())
