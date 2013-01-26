@@ -3,9 +3,8 @@
 __all__ = []
 
 
-from tornado.web import RequestHandler, ErrorHandler
-from tornado.template import Loader
-from utility import app_path
+from tornado.web import RequestHandler
+from tornado.escape import url_escape, url_unescape
 
 
 class BaseHandler(RequestHandler):
@@ -14,14 +13,15 @@ class BaseHandler(RequestHandler):
     # 
     # http://www.tornadoweb.org/documentation/web.html
     # 
+    USER_TOKEN = "__token__"
+    LOGIN_NEXT = "__next__"
 
-    loader = Loader(app_path(settings.TEMPLATE))
 
     def prepare(self):
         #
         # 处理登录、缓存。
         # 
-        pass
+        self._save_next_url()
 
 
     def get_error_html(self, status_code, **kwargs):
@@ -30,25 +30,56 @@ class BaseHandler(RequestHandler):
         # 页面模板可以获取 status_code 值。
         # 
         from os.path import exists
+        from utility import app_path
 
         for name in (status_code, "error"):
             filename = app_path("{0}/{1}.html".format(settings.TEMPLATE, name))
-            if exists(filename): return self._load_template(filename, status_code = status_code)
+            if exists(filename): return self.render_string(filename, status_code = status_code)
 
-        return "Error template file not found! {0}/{1}.html\n".format(settings.TEMPLATE, status_code)
+        return "Template file not found! {0}/{1}.html\n".format(settings.TEMPLATE, status_code)
 
 
-    def _load_template(self, filename, **kwargs):
+    def get_current_user(self):
         # 
-        # 返回模板文件内容。
+        # 使用不可逆的唯一标识。
+        # 使用有过期时间和签名的安全Cookie。
         # 
-        return self.loader.load(filename).generate(**kwargs)
+        return self.get_secure_cookie(self.USER_TOKEN)
+
+
+    def _save_next_url(self):
+        # 
+        # 保存 login_url 页面的 next 参数，以便登录后跳回。
+        # 
+        if self.request.path == self.get_login_url():
+            next = self.get_argument("next") or "/"
+            self.set_secure_cookie(self.LOGIN_NEXT, next, expires_days = None)
+
+
+    def signin(self, uid, expires_days = None, redirect = True):
+        # 
+        # 写入登录凭证信息。
+        # 
+        self.set_secure_cookie(self.USER_TOKEN, uid, expires_days = expires_days)
+
+        next = self.get_secure_cookie(self.LOGIN_NEXT) or "/"
+        self.clear_cookie(self.LOGIN_NEXT)
+        if redirect: self.redirect(next)
+
+
+    def signout(self, redirect_url = "/"):
+        # 
+        # 清除全部信息。
+        # 
+        self.clear_all_cookies()
+        if redirect_url: self.redirect(redirect_url)
 
 
 
 # 
 # 修改 tornado.web 默认错误处理方式
 # 
+from tornado.web import ErrorHandler
 ErrorHandler.__bases__ = (BaseHandler,)
 
 
@@ -72,7 +103,7 @@ def action(url, method = "GET", enabled = True, order = 0, auth = False, nocache
         from inspect import isfunction
         from tornado.web import authenticated
 
-        # 检查是否有效，多虑重复定义。
+        # 检查是否有效，过滤重复定义。
         if not enabled: return None                                      
         if not isfunction(func): return func
 
@@ -97,9 +128,23 @@ def hello(handler):
     # 演示
     # 
     handler.write("Hello, World!\n")
+    handler.write(handler.current_user + "\n")
 
 
 @action(r"/login")
 def login(handler):
-    handler.write("hi!")
+    # 
+    # 显示登录页面
+    # 
+    handler.write('<a href="/signin">signin</a>\n'.format(next))
+
+
+@action(r"/signin")
+def signin(handler):    
+    # 
+    # 登录页面 submit，通常会传入 username, password 进行验证。
+    # 
+    handler.signin("yuhen", 1)
+
+
 
