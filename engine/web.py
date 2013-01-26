@@ -56,11 +56,16 @@ class BaseHandler(RequestHandler):
             self.set_secure_cookie(self.LOGIN_NEXT, next, expires_days = None)
 
 
-    def signin(self, uid, expires_days = None, redirect = True):
+    def signin(self, name, expires_days = None, redirect = True):
         # 
         # 写入登录凭证信息。
         # 
-        self.set_secure_cookie(self.USER_TOKEN, uid, expires_days = expires_days)
+        # 参数:
+        #   name            用户标识
+        #   expires_days    保留天数 (None 表示浏览器 Session)
+        #   redirect        是否跳转回登录前的页面
+        # 
+        self.set_secure_cookie(self.USER_TOKEN, name, expires_days = expires_days)
 
         next = self.get_secure_cookie(self.LOGIN_NEXT) or "/"
         self.clear_cookie(self.LOGIN_NEXT)
@@ -70,6 +75,9 @@ class BaseHandler(RequestHandler):
     def signout(self, redirect_url = "/"):
         # 
         # 清除全部信息。
+        # 
+        # 参数:
+        #   redirect_url    注销后跳转的页面，None 不跳转。
         # 
         self.clear_all_cookies()
         if redirect_url: self.redirect(redirect_url)

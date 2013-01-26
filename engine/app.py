@@ -32,7 +32,7 @@ class AppEngine(object):
 
         # 显示载入信息。
         for h in handlers: 
-            print " + Load: [{0:>3}] {1:5} {2}  {3}".format(h.action.order, h.action.method, h.action.name, h.action.url)
+            print " + Load: [{0:>3}] {1:5} {2:<20}  {3}".format(h.action.order, h.action.method, h.action.name, h.action.url)
 
         return map(lambda h: (h.action.url, h), handlers)
 

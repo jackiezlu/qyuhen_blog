@@ -5,4 +5,7 @@
 问题1：
 
 函数set_defaultencoding()中我为何刚刚import sys又reload(sys)一次呢？
+@ set_defaultencoding 函数在虚拟机初始化过程中被 site.py 删掉了。
+
+
 
