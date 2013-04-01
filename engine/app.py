@@ -3,7 +3,8 @@
 __all__ = ["start"]
 
 
-from tornado.web import Application as torandoApplication, RedirectHandler, ErrorHandler
+from os import getpid
+from tornado.web import Application as torandoApplication, RequestHandler, RedirectHandler, ErrorHandler
 
 
 
@@ -13,11 +14,19 @@ class Application(torandoApplication):
     # 
     def __call__(self, request):
         # 
-        # 在处理错误前，记录请求信息。
+        # 拦截
         # 
         handler = super(Application, self).__call__(request)
-        print " *  URI: {0:<15} {1}".format(type(handler).__name__, request.uri)
+        self._log_request(handler, request)
         return handler
+
+
+    def _log_request(self, handler, request):
+        # 
+        # 在处理错误前，记录请求信息。
+        # 
+        if not settings.DEBUG: return
+        print " *  URI: {0:<20} {1}".format(type(handler).__name__, request.uri)
 
 
 
@@ -33,7 +42,6 @@ class AppEngine(object):
         # 获取 engine.web 和 action 中的所有 RequestHandler。
         # 
         from inspect import isclass
-        from tornado.web import RequestHandler
         from utility import get_module_members, get_package_members
         import web, action
 
@@ -76,7 +84,6 @@ class AppEngine(object):
         # 当 DEBUG = False 时，启动多进程模式。
         # 当 DEBUG = True 时，修改的模块自动重载。
         # 
-        from os import getpid
         from tornado.httpserver import HTTPServer
         from tornado.ioloop import IOLoop
 
@@ -101,7 +108,6 @@ def start():
     # 
     # 启动 AppEngine。
     # 
-    from os import getpid
     print "AppEngine starting... (pid:{0}, port:{1})".format(getpid(), settings.PORT)
 
     AppEngine().run()
