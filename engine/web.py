@@ -29,7 +29,7 @@ class BaseHandler(RequestHandler):
         # 
         # 查找错误页面: <status_code>.html，或者返回 error.html。
         # 页面模板可以获取 status_code 值。
-        # 
+        #
         from os.path import exists
         from utility import app_path
 
