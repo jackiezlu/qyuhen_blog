@@ -86,9 +86,11 @@ class AppEngine(object):
         # 
         from tornado.httpserver import HTTPServer
         from tornado.ioloop import IOLoop
+        from utility import app_path
 
         app = Application(self._get_handlers(), **self._get_settings())
-        server = HTTPServer(app)
+        ssl = {"certfile": app_path("keys/server.crt"), "keyfile": app_path("keys/server.key")}
+        server = HTTPServer(app, ssl_options = ssl)
         port = settings.PORT
 
         if settings.DEBUG:
